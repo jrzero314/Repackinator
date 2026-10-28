@@ -111,8 +111,29 @@ Repackinator provides a cross-platform command-line interface via `repackinator.
 * `Unregister` - Unregister context menu (Windows, requires admin)
 
 ### Getting Help
+
 * Run `repackinator.shell.exe -h` to view all available actions
 * Run `repackinator.shell.exe -a=<action> -h` to view detailed help for a specific action
+
+### Convert CCI to XISO
+
+Use the explicit XISO output option to decompress a CCI into a single Xbox
+data-partition `.iso` file:
+
+```text
+repackinator.shell.exe -a=convert -i "Game.1.cci" -o "Game.iso" --xiso
+```
+
+For split CCI images, select the first part and keep all parts together in the
+same folder. Without `-o`, the ISO is saved in a `Converted` subfolder beside the
+input. XISO output removes the video partition if present, scrubs unused sectors,
+trims trailing unused sectors, and disables output splitting. The output uses
+the `.iso` extension, not `.xiso`. A single ISO larger than the FATX file-size
+limit must be stored on a filesystem that supports it. `--xiso` cannot be combined
+with `--compress`. Existing ISO and CCI conversion options remain available.
+
+On Windows, register the shell integration and choose **Repackinator > Convert
+to XISO (single ISO)** from the input file's context menu.
 
 ### Example: Repack Action
 Run `repackinator.shell.exe -a=repack` along with the following options:

@@ -14,6 +14,7 @@ namespace Repackinator.Shell.Console
         public static bool Scrub { get; set; } = false;
         public static bool TrimScrub { get; set; } = false;
         public static bool Compress { get; set; } = false;
+        public static bool Xiso { get; set; } = false;
         public static bool NoSplit { get; set; } = false;
         public static bool ShowHelp { get; set; } = false;
         public static bool Wait { get; set; } = false;
@@ -25,6 +26,7 @@ namespace Repackinator.Shell.Console
                 { "i|input=", "Input file", i => Input = i },
                 { "o|output=", "Output file or directory (optional, defaults to 'Converted' subfolder)", o => Output = o },
                 { "c|compress", "Compress (CCI)", c => Compress = c != null },
+                { "x|xiso", "Create a single Xbox data-partition ISO (remove video partition, scrub and trim)", x => Xiso = x != null },
                 { "s|scrub", "Scrub", s => Scrub = s != null },
                 { "t|trim", "TrimScrub", t => TrimScrub = t != null },
                 { "n|nosplit", "No Split of output file", n => NoSplit = n != null },
@@ -55,6 +57,11 @@ namespace Repackinator.Shell.Console
                     ConsoleUtil.ShowHelpHeaderForAction(version, Action, options);
                     ConsoleUtil.ProcessWait(Wait);
                     return;
+                }
+
+                if (Xiso && Compress)
+                {
+                    throw new OptionException("XISO output cannot be combined with CCI compression.", "xiso");
                 }
 
                 if (string.IsNullOrEmpty(Input))
@@ -123,11 +130,17 @@ namespace Repackinator.Shell.Console
                     outputFile = Path.Combine(outputPath, $"{outputNameWithoutExtension}{extension}");
                 }
 
+                var inputSlices = ContainerUtility.GetSlicesFromFile(input);
+                var pathComparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+                if (inputSlices.Any(slice => string.Equals(Path.GetFullPath(slice), outputFile, pathComparison)))
+                {
+                    throw new OptionException("Output must not overwrite an input image or one of its parts.", "output");
+                }
+
                 if (!Quiet)
                 {
                     System.Console.WriteLine("Converting:");
-                    var slices = ContainerUtility.GetSlicesFromFile(input);
-                    foreach (var slice in slices)
+                    foreach (var slice in inputSlices)
                     {
                         System.Console.WriteLine(Path.GetFileName(slice));
                     }
@@ -154,6 +167,7 @@ namespace Repackinator.Shell.Console
                             var processingOptions = ProcessingOptions.OneToOneCopy;
                             if (Scrub || TrimScrub) processingOptions |= ProcessingOptions.ScrubSectors;
                             if (TrimScrub) processingOptions |= ProcessingOptions.TrimSectors;
+                            if (Xiso) processingOptions |= ProcessingOptions.RemoveVideoPartition | ProcessingOptions.ScrubSectors | ProcessingOptions.TrimSectors;
                             
                             if (Compress)
                             {
@@ -186,7 +200,7 @@ namespace Repackinator.Shell.Console
                             } 
                             else
                             {
-                                var splitPoint = NoSplit ? 0L : 4L * 1024 * 1024 * 1024; // 4GB
+                                var splitPoint = (NoSplit || Xiso) ? 0L : 4L * 1024 * 1024 * 1024; // 4GB
                                 var progress = new Action<float>((p) =>
                                 {
                                     var amount = (float)Math.Round(p * 100);
