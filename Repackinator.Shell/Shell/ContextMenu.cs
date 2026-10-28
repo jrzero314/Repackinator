@@ -44,7 +44,7 @@ namespace Repackinator.Shell.Shell
                 RegisterSubMenu(key, "02ConvertToISOScrub", "Convert to ISO (Scrub)", $"\"{exePath}\" -a=convert -i \"%L\" -s -w", exePath);
                 RegisterSubMenu(key, "03ConvertToISOTrimScrub", "Convert to ISO (TrimScrub)", $"\"{exePath}\" -a=convert -i \"%L\" -t -w", exePath);
 
-                RegisterSubMenu(key, "03ConvertToXISO", "Convert to XISO (single ISO)", $"\"{exePath}\" -a=convert -i \"%L\" --xiso -w", exePath);
+                RegisterSubMenu(key, "03ConvertToXISO", "CCI to XISO (single ISO)", $"\"{exePath}\" -a=convert -i \"%L\" --xiso -w", exePath);
 
                 // Convert to CCI options
                 RegisterSubMenu(key, "04ConvertToCCI", "Convert to CCI", $"\"{exePath}\" -a=convert -i \"%L\" -c -w", exePath);

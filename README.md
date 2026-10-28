@@ -132,7 +132,7 @@ the `.iso` extension, not `.xiso`. A single ISO larger than the FATX file-size
 limit must be stored on a filesystem that supports it. `--xiso` cannot be combined
 with `--compress`. Existing ISO and CCI conversion options remain available.
 
-On Windows, register the shell integration and choose **Repackinator > Convert
+On Windows, register the shell integration and choose **Repackinator > CCI
 to XISO (single ISO)** from the input file's context menu.
 
 ### Example: Repack Action
